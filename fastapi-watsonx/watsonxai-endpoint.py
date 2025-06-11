@@ -374,7 +374,11 @@ def generate_watsonx_stream(headers, payload, model_id):
 					text = chunk.get("content", "")
 
 				# check for final finish_reason
-				finish = chunk["choices"][0].get("finish_reason")
+				if "choices" in chunk and chunk["choices"]:
+					finish = chunk["choices"][0].get("finish_reason")
+				else:
+					# Mistral sometimes uses stop_reason or simply leaves it off until done
+					finish = chunk.get("finish_reason") or chunk.get("stop_reason")				
 				is_done = finish is not None or chunk.get("done")
 				
 				out = {
